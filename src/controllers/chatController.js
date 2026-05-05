@@ -8,9 +8,11 @@ const handleChat = async (req, res) => {
     }
 
     try {
+        console.log(`[BACKEND] Processing chat request. Prompt: ${prompt ? 'Yes' : 'No'}, Image: ${image ? 'Yes' : 'No'}`);
         const response = await aiService.generateResponse(prompt, history, image);
         res.status(200).json({ response });
     } catch (error) {
+        console.error("[BACKEND ERROR]", error);
         res.status(500).json({ error: error.message });
     }
 };

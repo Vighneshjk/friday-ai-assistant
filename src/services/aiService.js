@@ -47,10 +47,16 @@ const generateResponse = async (prompt, history = [], image = null) => {
     for (const msg of history) {
       let role = msg.role;
       if (role === 'model') role = 'assistant';
-      messages.push({
-        role: role,
-        content: msg.parts[0].text
-      });
+      
+      const parts = msg.parts || [];
+      const textContent = parts.map(part => part.text || "").join(" ");
+      
+      if (textContent || parts.length > 0) {
+        messages.push({
+          role: role,
+          content: textContent || "..."
+        });
+      }
     }
 
     const userContent = [];
@@ -66,16 +72,18 @@ const generateResponse = async (prompt, history = [], image = null) => {
 
     messages.push({ role: "user", content: userContent });
 
+    console.log("[FRIDAY] Sending request to Groq...");
     const completion = await openai.chat.completions.create({
       model: "llama-3.2-11b-vision-preview",
       messages: messages,
-      max_tokens: 1000,
+      max_tokens: 1024,
     });
 
+    console.log("[FRIDAY] Response received successfully.");
     return completion.choices[0].message.content;
   } catch (error) {
-    console.error("[FRIDAY Error]", error);
-    throw new Error("I'm having some trouble accessing my core processors, Boss.");
+    console.error("[FRIDAY Core Error]", error.response?.data || error.message);
+    throw new Error(error.response?.data?.error?.message || "I'm having some trouble accessing my core processors, Boss.");
   }
 };
 

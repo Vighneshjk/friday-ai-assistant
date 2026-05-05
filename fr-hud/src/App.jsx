@@ -146,9 +146,10 @@ function App() {
       speak(assistantMessage.text);
     } catch (error) {
       console.error("Link failure, Boss.", error);
-      const errorMsg = "I'm detecting an uplink disruption, Boss. Please check the backend systems.";
+      const backendError = error.response?.data?.error || error.message;
+      const errorMsg = `I'm detecting an uplink disruption, Boss. System says: ${backendError}`;
       setMessages(prev => [...prev, { role: 'assistant', text: errorMsg }]);
-      speak(errorMsg);
+      speak("Uplink disruption detected, Boss.");
     } finally {
       setIsProcessing(false);
     }
