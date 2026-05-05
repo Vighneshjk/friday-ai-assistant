@@ -38,7 +38,7 @@ const systemInstruction = `
     Assistant the Boss in managing systems, research, and technical tasks.
 `;
 
-const generateResponse = async (prompt, history = []) => {
+const generateResponse = async (prompt, history = [], image = null) => {
   try {
     const messages = [
       { role: "system", content: systemInstruction }
@@ -53,10 +53,21 @@ const generateResponse = async (prompt, history = []) => {
       });
     }
 
-    messages.push({ role: "user", content: prompt });
+    const userContent = [];
+    if (prompt) {
+      userContent.push({ type: "text", text: prompt });
+    }
+    if (image) {
+      userContent.push({
+        type: "image_url",
+        image_url: { url: image }
+      });
+    }
+
+    messages.push({ role: "user", content: userContent });
 
     const completion = await openai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "llama-3.2-11b-vision-preview",
       messages: messages,
       max_tokens: 1000,
     });

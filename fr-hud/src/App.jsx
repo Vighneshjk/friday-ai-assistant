@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Send, Activity, Cpu, Terminal } from 'lucide-react';
+import { Mic, Send, Activity, Cpu, Terminal, Plus, Image, Camera, X } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001/api/chat';
 console.log("[FRIDAY] Connecting to uplink:", API_URL);
@@ -19,7 +19,11 @@ function App() {
     network: 'Optimized'
   });
   const [isListening, setIsListening] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
   const scrollRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -101,17 +105,39 @@ function App() {
     recognition.start();
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || isProcessing) return;
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setFilePreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const userMessage = { role: 'user', text: input };
+  const clearFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+  };
+
+  const handleSend = async () => {
+    if ((!input.trim() && !filePreview) || isProcessing) return;
+
+    const userMessage = { role: 'user', text: input, image: filePreview };
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
+    const currentFile = filePreview;
+    
     setInput('');
+    clearFile();
     setIsProcessing(true);
 
     try {
       const response = await axios.post(API_URL, {
-        prompt: input,
+        prompt: currentInput,
+        image: currentFile,
         history: messages.map(m => ({ role: m.role, parts: [{ text: m.text }] }))
       });
 
@@ -187,6 +213,9 @@ function App() {
                       ? 'bg-[#00f2ff20] border border-[#00f2ff40]' 
                       : 'bg-[#ffffff05] border border-white/10'
                   }`}>
+                    {msg.image && (
+                      <img src={msg.image} alt="Uploaded" className="max-w-full h-auto rounded mb-2 border border-[#00f2ff30]" />
+                    )}
                     <p className="opacity-90 leading-relaxed">{msg.text}</p>
                   </div>
                 </motion.div>
@@ -203,15 +232,60 @@ function App() {
             )}
           </div>
 
+          {filePreview && (
+            <div className="px-4 py-2 border-t border-white/10 flex items-center gap-3 bg-black/40">
+              <div className="relative w-12 h-12 rounded border border-[#00f2ff50] overflow-hidden">
+                <img src={filePreview} alt="Preview" className="w-full h-full object-cover" />
+                <button onClick={clearFile} className="absolute top-0 right-0 bg-black/60 text-white p-0.5 rounded-bl">
+                  <X size={12} />
+                </button>
+              </div>
+              <span className="text-[10px] text-[#00f2ff] opacity-60 uppercase tracking-wider">Media Staged</span>
+            </div>
+          )}
+
           <div className="p-3 md:p-4 border-t border-white/10 flex gap-2 bg-black/20">
-            <button 
-              onClick={startListening}
-              className={`p-2 rounded-full transition-colors flex-shrink-0 ${
-                isListening ? 'bg-[#ff3333] text-white animate-pulse' : 'hover:bg-white/5 text-[#00f2ff]'
-              }`}
-            >
-              <Mic size={20} />
-            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+              className="hidden" 
+              accept="image/*" 
+            />
+            <input 
+              type="file" 
+              ref={cameraInputRef} 
+              onChange={handleFileChange} 
+              className="hidden" 
+              accept="image/*" 
+              capture="environment" 
+            />
+            
+            <div className="flex gap-1">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 hover:bg-white/5 text-[#00f2ff] rounded-full transition-colors"
+                title="Upload File"
+              >
+                <Plus size={20} />
+              </button>
+              <button 
+                onClick={() => cameraInputRef.current?.click()}
+                className="p-2 hover:bg-white/5 text-[#00f2ff] rounded-full transition-colors md:hidden"
+                title="Camera"
+              >
+                <Camera size={20} />
+              </button>
+              <button 
+                onClick={startListening}
+                className={`p-2 rounded-full transition-colors flex-shrink-0 ${
+                  isListening ? 'bg-[#ff3333] text-white animate-pulse' : 'hover:bg-white/5 text-[#00f2ff]'
+                }`}
+              >
+                <Mic size={20} />
+              </button>
+            </div>
+
             <input 
               value={input}
               onChange={(e) => setInput(e.target.value)}
