@@ -233,18 +233,23 @@ function App() {
           </div>
 
           {filePreview && (
-            <div className="px-4 py-2 border-t border-white/10 flex items-center gap-3 bg-black/40">
-              <div className="relative w-12 h-12 rounded border border-[#00f2ff50] overflow-hidden">
-                <img src={filePreview} alt="Preview" className="w-full h-full object-cover" />
-                <button onClick={clearFile} className="absolute top-0 right-0 bg-black/60 text-white p-0.5 rounded-bl">
-                  <X size={12} />
+            <div className="px-4 py-2 border-t border-white/10 flex items-center gap-3 bg-[#00f2ff05] backdrop-blur-md">
+              <div className="relative w-14 h-14 rounded border border-[#00f2ff50] overflow-hidden group">
+                <img src={filePreview} alt="Preview" className="w-full h-full object-cover opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#00f2ff20] to-transparent animate-pulse pointer-events-none"></div>
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00f2ff] animate-[scan_2s_linear_infinite] opacity-50"></div>
+                <button onClick={clearFile} className="absolute top-0 right-0 bg-[#ff3333] text-white p-1 rounded-bl transition-transform hover:scale-110">
+                  <X size={14} />
                 </button>
               </div>
-              <span className="text-[10px] text-[#00f2ff] opacity-60 uppercase tracking-wider">Media Staged</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-[#00f2ff] font-bold uppercase tracking-widest glow-text">MEDIA STAGED</span>
+                <span className="text-[8px] text-[#00f2ff] opacity-40 uppercase">Ready for analysis...</span>
+              </div>
             </div>
           )}
 
-          <div className="p-3 md:p-4 border-t border-white/10 flex gap-2 bg-black/20">
+          <div className="p-2 md:p-4 border-t border-white/10 flex items-center gap-2 bg-black/40 backdrop-blur-xl">
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -261,25 +266,26 @@ function App() {
               capture="environment" 
             />
             
-            <div className="flex gap-1">
+            <div className="flex items-center gap-0.5 md:gap-1">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 hover:bg-white/5 text-[#00f2ff] rounded-full transition-colors"
+                className="p-2 hover:bg-[#00f2ff10] text-[#00f2ff] rounded-full transition-all hover:scale-110 active:scale-95"
                 title="Upload File"
               >
                 <Plus size={20} />
               </button>
               <button 
                 onClick={() => cameraInputRef.current?.click()}
-                className="p-2 hover:bg-white/5 text-[#00f2ff] rounded-full transition-colors md:hidden"
+                className="p-2 hover:bg-[#00f2ff10] text-[#00f2ff] rounded-full transition-all hover:scale-110 active:scale-95 md:hidden"
                 title="Camera"
               >
                 <Camera size={20} />
               </button>
+              <div className="w-[1px] h-6 bg-white/10 mx-1 hidden md:block"></div>
               <button 
                 onClick={startListening}
-                className={`p-2 rounded-full transition-colors flex-shrink-0 ${
-                  isListening ? 'bg-[#ff3333] text-white animate-pulse' : 'hover:bg-white/5 text-[#00f2ff]'
+                className={`p-2 rounded-full transition-all hover:scale-110 active:scale-95 flex-shrink-0 ${
+                  isListening ? 'bg-[#ff3333] text-white shadow-[0_0_15px_#ff3333] animate-pulse' : 'hover:bg-white/5 text-[#00f2ff]'
                 }`}
               >
                 <Mic size={20} />
@@ -290,12 +296,17 @@ function App() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Awaiting command..."
-              className="flex-1 bg-transparent border-none outline-none text-base md:text-sm text-white placeholder-white/20 min-w-0"
+              placeholder={isListening ? "Listening..." : "Awaiting command, Boss..."}
+              className="flex-1 bg-transparent border-none outline-none text-base md:text-sm text-white placeholder-white/20 min-w-0 font-mono tracking-wide"
             />
             <button 
               onClick={handleSend}
-              className="p-2 hover:bg-[#00f2ff20] rounded-full text-[#00f2ff] transition-colors flex-shrink-0"
+              disabled={(!input.trim() && !filePreview) || isProcessing}
+              className={`p-2 rounded-full transition-all flex-shrink-0 ${
+                (!input.trim() && !filePreview) || isProcessing
+                ? 'opacity-20 cursor-not-allowed'
+                : 'hover:bg-[#00f2ff20] text-[#00f2ff] hover:scale-110 active:scale-95'
+              }`}
             >
               <Send size={20} />
             </button>

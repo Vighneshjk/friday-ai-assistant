@@ -89,3 +89,8 @@ body::after {
   0% { background-position: 0 0; }
   100% { background-position: 0 500px; }
 }
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
