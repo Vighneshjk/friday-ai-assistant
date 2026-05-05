@@ -152,9 +152,8 @@ function App() {
           <div className="space-y-2 text-xs opacity-70 font-mono">
             <p className="animate-pulse">{">"} Network: Encrypted</p>
             <p>{">"} Uplink: Stable</p>
-            <p>{">"} Satellite Sync: Active</p>
             <p>{">"} Identity: F.R.I.D.A.Y.</p>
-            <p>{">"} Auth: Admin (Stark)</p>
+            <p>{">"} Auth: Admin (VJ)</p>
           </div>
         </div>
       </div>
