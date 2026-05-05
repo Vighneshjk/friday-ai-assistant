@@ -26,9 +26,17 @@ body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-family: 'Exo', sans-serif;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
+  overflow-x: hidden;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available; /* Fallback */
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  body {
+    overflow: hidden;
+    height: 100vh;
+  }
 }
 
 h1, h2, h3, .hud-display {

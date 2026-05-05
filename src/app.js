@@ -7,8 +7,18 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: '*', // Allow all for now to debug
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+}));
 app.use(express.json());
+
+// Log every single request that hits the server
+app.use((req, res, next) => {
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url} - Origin: ${req.get('origin')}`);
+    next();
+});
 
 // Routes
 app.use('/api/chat', chatRoutes);

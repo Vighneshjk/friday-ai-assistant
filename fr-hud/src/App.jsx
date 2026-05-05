@@ -3,7 +3,8 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Send, Settings, Activity, Shield, Cpu, Zap, Terminal } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/chat';
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001/api/chat';
+console.log("[FRIDAY] Connecting to uplink:", API_URL);
 
 function App() {
   const [messages, setMessages] = useState([
@@ -128,11 +129,11 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-screen relative flex overflow-hidden">
+    <div className="min-h-screen w-screen relative flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto lg:overflow-hidden bg-[#050a0f] selection:bg-[#00f2ff30]">
       <div className="grid-bg"></div>
       
-      {/* Left Sidebar - Status */}
-      <div className="w-80 h-full p-6 flex flex-col gap-6 z-10">
+      {/* Left Sidebar - Status (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-80 h-full p-6 flex-col gap-6 z-10">
         <div className="glass p-4 border-l-2 border-l-[#00f2ff]">
           <h3 className="text-sm mb-4 flex items-center gap-2 text-[#00f2ff]">
             <Activity size={16} /> SYSTEM DIAGNOSTICS
@@ -158,15 +159,21 @@ function App() {
         </div>
       </div>
 
-      <div className="flex-1 h-full flex flex-col items-center justify-center relative p-6">
-        <div className="absolute top-10 flex flex-col items-center">
-            <h1 className="text-4xl font-bold glow-text tracking-widest text-[#00f2ff]">F.R.I.D.A.Y.</h1>
-            <p className="text-xs tracking-[0.3em] opacity-50 uppercase mt-2">Digital Assistant Youth</p>
+      {/* Main Content */}
+      <div className="flex-1 min-h-screen flex flex-col items-center justify-start lg:justify-center relative p-4 md:p-6 pb-24 lg:pb-6">
+        <div className="mt-4 lg:mt-8 lg:absolute lg:top-10 flex flex-col items-center z-10">
+            <h1 className="text-2xl md:text-4xl font-bold glow-text tracking-widest text-[#00f2ff]">F.R.I.D.A.Y.</h1>
+            <div className="flex items-center gap-2 mt-1 md:mt-2">
+              <div className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isProcessing ? 'bg-yellow-400 animate-pulse' : 'bg-[#00f2ff]'}`}></div>
+              <p className="text-[8px] md:text-xs tracking-[0.3em] opacity-50 uppercase">Uplink: {isProcessing ? 'Processing' : 'Stable'}</p>
+            </div>
         </div>
 
-        <FridayCore isProcessing={isProcessing} />
+        <div className="scale-50 md:scale-75 lg:scale-100 my-4 lg:my-8">
+          <FridayCore isProcessing={isProcessing} />
+        </div>
 
-        <div className="w-full max-w-2xl mt-8 glass flex flex-col h-[400px] z-10">
+        <div className="w-full max-w-2xl glass flex flex-col h-[50vh] md:h-[400px] z-10 shadow-2xl">
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
             <AnimatePresence initial={false}>
               {messages.map((msg, idx) => (
@@ -176,12 +183,12 @@ function App() {
                   animate={{ opacity: 1, x: 0 }}
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                  <div className={`max-w-[85%] md:max-w-[80%] p-3 rounded-lg text-sm ${
                     msg.role === 'user' 
                       ? 'bg-[#00f2ff20] border border-[#00f2ff40]' 
                       : 'bg-[#ffffff05] border border-white/10'
                   }`}>
-                    <p className="opacity-90">{msg.text}</p>
+                    <p className="opacity-90 leading-relaxed">{msg.text}</p>
                   </div>
                 </motion.div>
               ))}
@@ -197,10 +204,10 @@ function App() {
             )}
           </div>
 
-          <div className="p-4 border-t border-white/10 flex gap-2">
+          <div className="p-3 md:p-4 border-t border-white/10 flex gap-2 bg-black/20">
             <button 
               onClick={startListening}
-              className={`p-2 rounded-full transition-colors ${
+              className={`p-2 rounded-full transition-colors flex-shrink-0 ${
                 isListening ? 'bg-[#ff3333] text-white animate-pulse' : 'hover:bg-white/5 text-[#00f2ff]'
               }`}
             >
@@ -210,12 +217,12 @@ function App() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Awaiting command, Boss..."
-              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-white/20"
+              placeholder="Awaiting command..."
+              className="flex-1 bg-transparent border-none outline-none text-base md:text-sm text-white placeholder-white/20 min-w-0"
             />
             <button 
               onClick={handleSend}
-              className="p-2 hover:bg-[#00f2ff20] rounded-full text-[#00f2ff] transition-colors"
+              className="p-2 hover:bg-[#00f2ff20] rounded-full text-[#00f2ff] transition-colors flex-shrink-0"
             >
               <Send size={20} />
             </button>
@@ -223,8 +230,8 @@ function App() {
         </div>
       </div>
 
-      {/* Right Sidebar - Security */}
-      <div className="w-80 h-full p-6 flex flex-col gap-6 z-10">
+      {/* Right Sidebar - Security (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-80 h-full p-6 flex-col gap-6 z-10">
         <div className="glass p-4 border-r-2 border-r-[#00f2ff] h-full flex flex-col">
             <h3 className="text-sm mb-6 flex items-center gap-2 text-[#00f2ff]">
                 <Shield size={16} /> SECURITY NODES
