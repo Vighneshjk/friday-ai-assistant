@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Send, Settings, Activity, Shield, Cpu, Zap, Terminal } from 'lucide-react';
+import { Mic, Send, Activity, Cpu, Terminal } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001/api/chat';
 console.log("[FRIDAY] Connecting to uplink:", API_URL);
@@ -230,26 +230,7 @@ function App() {
         </div>
       </div>
 
-      {/* Right Sidebar - Security (Hidden on Mobile) */}
-      <div className="hidden lg:flex w-80 h-full p-6 flex-col gap-6 z-10">
-        <div className="glass p-4 border-r-2 border-r-[#00f2ff] h-full flex flex-col">
-            <h3 className="text-sm mb-6 flex items-center gap-2 text-[#00f2ff]">
-                <Shield size={16} /> SECURITY NODES
-            </h3>
-            <div className="flex-1 grid grid-cols-2 gap-4">
-                {[1,2,3,4,5,6].map(i => (
-                    <div key={i} className="aspect-square glass flex flex-col items-center justify-center gap-2 group cursor-pointer hover:bg-[#00f2ff10] transition-colors">
-                        <Zap size={16} className="text-[#00f2ff] opacity-50 group-hover:opacity-100" />
-                        <span className="text-[10px] opacity-40">NODE-0{i}</span>
-                    </div>
-                ))}
-            </div>
-            <div className="mt-6 p-3 bg-[#00f2ff10] rounded border border-[#00f2ff20]">
-                <p className="text-[10px] text-[#00f2ff] uppercase tracking-wider mb-1">Authorization</p>
-                <p className="text-xs">Level 7 Stark Signature</p>
-            </div>
-        </div>
-      </div>
+
     </div>
   );
 }
