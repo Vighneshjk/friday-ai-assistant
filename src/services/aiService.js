@@ -82,8 +82,9 @@ const generateResponse = async (prompt, history = [], image = null) => {
     console.log("[FRIDAY] Response received successfully.");
     return completion.choices[0].message.content;
   } catch (error) {
-    console.error("[FRIDAY Core Error]", error.response?.data || error.message);
-    throw new Error(error.response?.data?.error?.message || "I'm having some trouble accessing my core processors, Boss.");
+    console.error("[FRIDAY Core Error]", error);
+    const errorMessage = error.error?.message || error.message || "Unknown error in core processors.";
+    throw new Error(errorMessage);
   }
 };
 
