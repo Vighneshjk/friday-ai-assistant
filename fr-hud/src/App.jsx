@@ -23,7 +23,7 @@ function App() {
   const [filePreview, setFilePreview] = useState(null);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -119,7 +119,7 @@ function App() {
     setSelectedFile(null);
     setFilePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleSend = async () => {
@@ -258,29 +258,15 @@ function App() {
               className="hidden" 
               accept="image/*" 
             />
-            <input 
-              type="file" 
-              ref={cameraInputRef} 
-              onChange={handleFileChange} 
-              className="hidden" 
-              accept="image/*" 
-              capture="environment" 
-            />
+
             
             <div className="flex items-center gap-0.5 md:gap-1">
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2 hover:bg-[#00f2ff10] text-[#00f2ff] rounded-full transition-all hover:scale-110 active:scale-95"
-                title="Upload File"
+                title="Attach Media"
               >
-                <Plus size={20} />
-              </button>
-              <button 
-                onClick={() => cameraInputRef.current?.click()}
-                className="p-2 hover:bg-[#00f2ff10] text-[#00f2ff] rounded-full transition-all hover:scale-110 active:scale-95 md:hidden"
-                title="Camera"
-              >
-                <Camera size={20} />
+                <Image size={20} />
               </button>
               <div className="w-[1px] h-6 bg-white/10 mx-1 hidden md:block"></div>
               <button 

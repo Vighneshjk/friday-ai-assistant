@@ -74,7 +74,7 @@ const generateResponse = async (prompt, history = [], image = null) => {
 
     console.log("[FRIDAY] Sending request to Groq...");
     const completion = await openai.chat.completions.create({
-      model: "llama-3.2-11b-vision",
+      model: "llama-3.3-70b-versatile",
       messages: messages,
       max_tokens: 1024,
     });
