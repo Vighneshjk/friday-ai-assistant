@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Send, Activity, Cpu, Terminal, Plus, Image, Camera, X } from 'lucide-react';
 
@@ -49,34 +50,42 @@ function App() {
       
       const voices = window.speechSynthesis.getVoices();
       
-      // Known female voice names across Windows, macOS, and Google Chrome
-      const femaleNames = ['zira', 'hazel', 'samantha', 'victoria', 'karen', 'tessa', 'veena', 'moira', 'fiona', 'grace', 'susan', 'catherine'];
+      // Extensive list of known female voice names and identifiers
+      const femaleIdentifiers = [
+        'zira', 'hazel', 'samantha', 'victoria', 'karen', 'tessa', 'veena', 
+        'moira', 'fiona', 'grace', 'susan', 'catherine', 'irene', 'mary', 
+        'linda', 'amy', 'olivia', 'elsa', 'anna', 'serena', 'mariska', 'yanick'
+      ];
       
+      const maleIdentifiers = ['david', 'mark', 'arthur', 'daniel', 'alex', 'fred', 'male', 'guy', 'thomas'];
+
       // 1. Try to find explicitly female labeled voice
-      let preferredVoice = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.includes('en'));
+      let preferredVoice = voices.find(v => 
+        (v.name.toLowerCase().includes('female') || femaleIdentifiers.some(name => v.name.toLowerCase().includes(name))) && 
+        v.lang.includes('en')
+      );
       
-      // 2. Try to find known female names
+      // 2. If not found, try any English voice that DOES NOT contain male identifiers
       if (!preferredVoice) {
-        preferredVoice = voices.find(v => femaleNames.some(name => v.name.toLowerCase().includes(name)) && v.lang.includes('en'));
-      }
-      
-      // 3. Fallback to any English voice that DOES NOT contain male identifiers
-      if (!preferredVoice) {
-        const maleNames = ['david', 'mark', 'arthur', 'daniel', 'alex', 'fred', 'male'];
         preferredVoice = voices.find(v => 
           v.lang.includes('en') && 
-          !maleNames.some(name => v.name.toLowerCase().includes(name))
+          !maleIdentifiers.some(name => v.name.toLowerCase().includes(name))
         );
       }
       
-      // 4. Absolute fallback
+      // 3. Fallback to any voice that isn't male
+      if (!preferredVoice) {
+        preferredVoice = voices.find(v => !maleIdentifiers.some(name => v.name.toLowerCase().includes(name)));
+      }
+
+      // 4. Final fallback (should ideally not be reached if voices are available)
       if (!preferredVoice && voices.length > 0) {
-        preferredVoice = voices.find(v => v.lang.includes('en')) || voices[0];
+        preferredVoice = voices[0];
       }
       
       if (preferredVoice) utterance.voice = preferredVoice;
-      utterance.pitch = 1.3;
-      utterance.rate = 1.1;
+      utterance.pitch = 1.25; // Slightly higher pitch for female tone
+      utterance.rate = 1.05;  // Natural rate
       
       window.speechSynthesis.speak(utterance);
     }
@@ -217,7 +226,9 @@ function App() {
                     {msg.image && (
                       <img src={msg.image} alt="Uploaded" className="max-w-full h-auto rounded mb-2 border border-[#00f2ff30]" />
                     )}
-                    <p className="opacity-90 leading-relaxed">{msg.text}</p>
+                    <div className="opacity-90 leading-relaxed markdown-content">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
                   </div>
                 </motion.div>
               ))}
