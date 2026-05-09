@@ -32,6 +32,14 @@ function App() {
     }
   }, [messages]);
 
+  // Initial greeting
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      speak(messages[0].text);
+    }, 1000); // Small delay to ensure voices are loaded
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setDiagnostics(prev => ({
@@ -46,48 +54,60 @@ function App() {
   const speak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
       
-      const voices = window.speechSynthesis.getVoices();
-      
-      // Extensive list of known female voice names and identifiers
-      const femaleIdentifiers = [
-        'zira', 'hazel', 'samantha', 'victoria', 'karen', 'tessa', 'veena', 
-        'moira', 'fiona', 'grace', 'susan', 'catherine', 'irene', 'mary', 
-        'linda', 'amy', 'olivia', 'elsa', 'anna', 'serena', 'mariska', 'yanick'
-      ];
-      
-      const maleIdentifiers = ['david', 'mark', 'arthur', 'daniel', 'alex', 'fred', 'male', 'guy', 'thomas'];
+      const doSpeak = () => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        
+        if (voices.length === 0) {
+           // If still no voices, we can't do much but wait or use default
+           // But usually voiceschanged will trigger this again
+           return;
+        }
 
-      // 1. Try to find explicitly female labeled voice
-      let preferredVoice = voices.find(v => 
-        (v.name.toLowerCase().includes('female') || femaleIdentifiers.some(name => v.name.toLowerCase().includes(name))) && 
-        v.lang.includes('en')
-      );
-      
-      // 2. If not found, try any English voice that DOES NOT contain male identifiers
-      if (!preferredVoice) {
-        preferredVoice = voices.find(v => 
-          v.lang.includes('en') && 
-          !maleIdentifiers.some(name => v.name.toLowerCase().includes(name))
+        const femaleIdentifiers = [
+          'zira', 'hazel', 'samantha', 'victoria', 'karen', 'tessa', 'veena', 
+          'moira', 'fiona', 'grace', 'susan', 'catherine', 'irene', 'mary', 
+          'linda', 'amy', 'olivia', 'elsa', 'anna', 'serena', 'mariska', 'yanick'
+        ];
+        
+        const maleIdentifiers = ['david', 'mark', 'arthur', 'daniel', 'alex', 'fred', 'male', 'guy', 'thomas'];
+
+        let preferredVoice = voices.find(v => 
+          (v.name.toLowerCase().includes('female') || femaleIdentifiers.some(name => v.name.toLowerCase().includes(name))) && 
+          v.lang.includes('en')
         );
-      }
-      
-      // 3. Fallback to any voice that isn't male
-      if (!preferredVoice) {
-        preferredVoice = voices.find(v => !maleIdentifiers.some(name => v.name.toLowerCase().includes(name)));
-      }
+        
+        if (!preferredVoice) {
+          preferredVoice = voices.find(v => 
+            v.lang.includes('en') && 
+            !maleIdentifiers.some(name => v.name.toLowerCase().includes(name))
+          );
+        }
+        
+        if (!preferredVoice) {
+          preferredVoice = voices.find(v => !maleIdentifiers.some(name => v.name.toLowerCase().includes(name)));
+        }
 
-      // 4. Final fallback (should ideally not be reached if voices are available)
-      if (!preferredVoice && voices.length > 0) {
-        preferredVoice = voices[0];
+        if (!preferredVoice && voices.length > 0) {
+          preferredVoice = voices[0];
+        }
+        
+        if (preferredVoice) utterance.voice = preferredVoice;
+        utterance.pitch = 1.3; 
+        utterance.rate = 1.05;
+        
+        window.speechSynthesis.speak(utterance);
+      };
+
+      if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          doSpeak();
+          window.speechSynthesis.onvoiceschanged = null; // Prevent multiple triggers
+        };
+      } else {
+        doSpeak();
       }
-      
-      if (preferredVoice) utterance.voice = preferredVoice;
-      utterance.pitch = 1.25; // Slightly higher pitch for female tone
-      utterance.rate = 1.05;  // Natural rate
-      
-      window.speechSynthesis.speak(utterance);
     }
   };
 
