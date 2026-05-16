@@ -21,6 +21,16 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.get('/', (req, res) => {
+    res.status(200).json({ 
+        message: 'F.R.I.D.A.Y. Core API is online.',
+        endpoints: {
+            chat: 'POST /api/chat',
+            health: 'GET /health'
+        }
+    });
+});
+
 app.use('/api', chatRoutes);
 
 // Health check

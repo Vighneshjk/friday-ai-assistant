@@ -4,7 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Send, Activity, Cpu, Terminal, Plus, Image, Camera, X } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001/api/chat';
+const BASE_API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001';
+const API_URL = BASE_API_URL.endsWith('/api/chat') ? BASE_API_URL : `${BASE_API_URL.replace(/\/$/, '')}/api/chat`;
 console.log("[FRIDAY] Connecting to uplink:", API_URL);
 
 function App() {
