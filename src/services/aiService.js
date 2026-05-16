@@ -66,22 +66,27 @@ const generateResponse = async (prompt, history = [], image = null) => {
       }
     }
 
-    const userContent = [];
-    if (prompt) {
-      userContent.push({ type: "text", text: prompt });
-    }
+    // Prepare current user message
     if (image) {
+      // Vision models require specific formatting
+      const userContent = [];
+      if (prompt) userContent.push({ type: "text", text: prompt });
       userContent.push({
         type: "image_url",
         image_url: { url: image }
       });
+      messages.push({ role: "user", content: userContent });
+    } else {
+      // Text models work best with simple strings on Groq
+      messages.push({ role: "user", content: prompt || "Continue." });
     }
 
-    messages.push({ role: "user", content: userContent });
+    // Determine model: use vision model if image is present
+    const model = image ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile";
 
-    console.log("[FRIDAY] Sending request to Groq...");
+    console.log(`[FRIDAY] Sending request to Groq (${model})...`);
     const completion = await openai.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: model,
       messages: messages,
       max_tokens: 1024,
     });

@@ -21,11 +21,17 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api/chat', chatRoutes);
+app.use('/api', chatRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'All systems nominal, Boss.' });
+});
+
+// Catch-all for 404s
+app.use((req, res) => {
+    console.warn(`[404] Route not found: ${req.method} ${req.url}`);
+    res.status(404).json({ error: `Path ${req.url} not found on this server.` });
 });
 
 module.exports = app;
